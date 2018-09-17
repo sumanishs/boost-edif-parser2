@@ -26,15 +26,100 @@ struct edif_grammar
 		using boost::spirit::_3;
 		using boost::spirit::_4;
 
-        start       = +statements;  
-        statements = '(' >> tok.edif_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> edif_version_ >> ')';
-        edif_version_ = '(' >> tok.edif_version_ [PrintStr(*ptb)] >> +tok.int_constant [PrintInt(*ptb)] >> ')';
-	
-        str_identifier  = tok.identifier [_val = _1]
-						| string_	[_val = _1]
-						;
-
+        str_identifier  = tok.identifier [_val = _1] | string_	[_val = _1] ;
 		string_         = '"' >> tok.identifier >> '"';
+        
+        start       = +statements;  
+        statements =    '(' 
+                        >> tok.edif_ [PrintStr(*ptb)] 
+                        >> str_identifier [PrintStr(*ptb)] 
+                        >> +edif_statements_
+                        >> ')';
+        edif_statements_ = edif_version_
+                          | edif_level_
+                          | keyword_map_
+                          | status_statement_ 
+                          | external_section_ 
+                          ;        
+        
+        edif_version_   = '(' >> tok.edif_version_ [PrintStr(*ptb)] >> +tok.int_constant [PrintInt(*ptb)] >> ')';
+	    edif_level_     = '(' >> tok.edif_level_ [PrintStr(*ptb)] >> +tok.int_constant [PrintInt(*ptb)] >> ')'; 
+        keyword_map_    = '(' >> tok.keyword_map_ [PrintStr(*ptb)] >> '(' >> tok.keyword_level_ [PrintStr(*ptb)] >> +tok.int_constant [PrintInt(*ptb)] >> ')' >> ')';
+        status_statement_   = '(' >> tok.status_ [PrintStr(*ptb)] >> written_statement_ >> ')';
+        written_statement_  = '(' >> tok.written_ [PrintStr(*ptb)] >> +written_sections_ >> ')';
+        written_sections_   = time_stamp_
+                             | program_statement_
+                             | data_origin_
+                             | author_
+                             ;
+        time_stamp_         = '(' >> tok.time_stamp_ [PrintStr(*ptb)] >> +tok.int_constant [PrintInt(*ptb)] >> ')';
+        program_statement_  = '(' >> tok.program_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> prog_version_ >> ')';
+        prog_version_       = '(' >> tok.prog_version_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
+        data_origin_        = '(' >> tok.data_origin_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
+        author_             = '(' >> tok.author_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')'; 
+
+        external_section_   = '(' 
+                               >> tok.external_ [PrintStr(*ptb)] 
+                               >> str_identifier [PrintStr(*ptb)] 
+                               >> +external_section_statements_
+                               >> ')'
+                               ;
+        external_section_statements_ = edif_level_
+                                      | technology_section_
+                                      | cell_definition_section_  
+                                      ;
+
+        technology_section_ = '(' >> tok.technology_ [PrintStr(*ptb)] >> numberDefinition_section_ >> ')';
+        numberDefinition_section_   = '(' >> tok.numberDefinition_ [PrintStr(*ptb)] >> ')';     
+ 
+        cell_definition_section_ = '(' >> tok.cell_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] 
+                                       >> + cell_def_statements_
+                                       >> ')';
+        cell_def_statements_    = cell_type_section_
+                                 | view_section_
+                                 ;    
+        cell_type_section_  = '(' >> tok.cellType_ [PrintStr(*ptb)]>> str_identifier [PrintStr(*ptb)] >> ')';
+        view_section_   = '(' >> tok.view_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)]
+                              >> +view_section_statements_
+                              >> ')'
+                                ;
+        view_section_statements_    = view_type_section_
+                                     | interface_section_
+                                     | contents_section_
+                                     ;
+        view_type_section_              = '(' >> tok.viewType_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
+        interface_section_              = '(' >> tok.interface_ [PrintStr(*ptb)] >> +interface_section_statements_ >> ')';
+        interface_section_statements_   = port_declarations_
+                                        | property_declaration_
+                                        ;          
+        port_declarations_              = '(' >> tok.port_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> direction_section_ >> ')';
+        direction_section_              = '(' >> tok.direction_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
+        property_declaration_           = '(' >> tok.property_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> property_val_section_ >> ')';
+        property_val_section_           = prop_int_val_
+                                        | prop_str_val_
+                                        ;                                    
+        prop_int_val_   = '(' >> tok.integer_ [PrintStr(*ptb)] >> tok.int_constant [PrintInt(*ptb)] >> ')';
+        prop_str_val_   = '(' >> tok.string_  [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';  
+
+        contents_section_ = '(' >> tok.contentstag_ [PrintStr(*ptb)] 
+                                >> +contents_section_statements_ 
+                                >> ')';
+        contents_section_statements_ = instance_section_
+                                      | net_section_
+                                      ;
+        instance_section_   = '(' >> tok.instance_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> viewref_section_ >> ')';
+        viewref_section_    = '(' >> tok.viewRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> cellref_section_ >> ')';
+        cellref_section_    = '(' >> tok.cellRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> libraryref_section_ >> ')';
+        libraryref_section_ = '(' >> tok.libraryRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
+
+        net_section_        = '(' >> tok.net_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> connection_section_ >> ')';
+        connection_section_ = '(' >> tok.joined_ [PrintStr(*ptb)] >> +port_connections_ >> ')';
+        port_connections_   = '(' >> tok.portRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] 
+                                >> instanceref_section_
+                                >> ')';
+        instanceref_section_ = '(' >> tok.instanceRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';    
+                    
+
 
 		qi::on_error<qi::fail>
 		  (
@@ -49,7 +134,23 @@ struct edif_grammar
 		  );
     }
 
-    qi::rule<Iterator, qi::in_state_skipper<Lexer> > start, statements, edif_, edif_version_, number_list_;
+    qi::rule<Iterator, qi::in_state_skipper<Lexer> > start, statements, edif_, edif_statements_, edif_version_, edif_level_,
+                                                     keyword_map_, status_statement_, written_statement_, written_sections_, time_stamp_, 
+                                                     program_statement_, prog_version_, data_origin_, author_, external_section_,
+                                                     technology_section_, numberDefinition_section_, external_section_statements_;
+
+    qi::rule<Iterator, qi::in_state_skipper<Lexer> > cell_definition_section_, cell_def_statements_, cell_type_section_,
+                                                     view_section_, view_section_statements_, view_type_section_, interface_section_,
+                                                     interface_section_statements_, port_declarations_, direction_section_,
+                                                     property_declaration_, property_val_section_, prop_int_val_, prop_str_val_
+                                                     ;
+
+    qi::rule<Iterator, qi::in_state_skipper<Lexer> > contents_section_, contents_section_statements_, instance_section_, net_section_,
+                                                     viewref_section_, cellref_section_, libraryref_section_, connection_section_,
+                                                     port_connections_, instanceref_section_
+                                                     ; 
+
+
     qi::rule<Iterator, std::string(), qi::in_state_skipper<Lexer> > string_;
 	qi::rule<Iterator, std::string(), qi::in_state_skipper<Lexer> > str_identifier;
 

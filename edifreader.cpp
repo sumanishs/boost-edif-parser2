@@ -44,21 +44,20 @@ EdifReader::Read(std::string& filename){
     std::stringstream strStream;
     strStream << inFile.rdbuf();
     std::string str(strStream.str());
-    str.pop_back();
-    std::cout << "File content:" << str << "!" << std::endl;
+    //str.pop_back();
+    std::cout << "File content:\n" << str << "!" << std::endl;
     inFile.close();
 
     std::string::iterator it = str.begin();
     iterator_type iter = tokens.begin(it, str.end());
     iterator_type end = tokens.end();
 
-    iterator_type itr = iter;
-    while (itr != end && token_is_valid(*itr))
-    {   
-        std::cout << "Token: " << itr->id() << ": " /*<< tokens.nameof(itr)*/ << " ('" << itr->value() << "')\n";
-        ++itr;
-    }   
-
+    //iterator_type itr = iter;
+    //while (itr != end && token_is_valid(*itr))
+    //{   
+    //    std::cout << "Token: " << itr->id() << ": " /*<< tokens.nameof(itr)*/ << " ('" << itr->value() << "')\n";
+    //    ++itr;
+    //}   
     //return 0;
 
 

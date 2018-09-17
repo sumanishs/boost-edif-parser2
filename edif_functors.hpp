@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace qi = boost::spirit::qi;
+//namespace qi = boost::spirit::qi;
 
 struct PrintStr {
     void operator()(const std::string& str, qi::unused_type, qi::unused_type ) const{

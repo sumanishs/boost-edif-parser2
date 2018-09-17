@@ -3,8 +3,8 @@
 
  (status
   (written (timeStamp 2001 11 14 13 3 27)
-   (program "vim" (Version "6.0"))
-   (dataOrigin "moxon design") (author "tom moxon")
+   (program "vim" (Version "v6.0"))
+   (dataOrigin "moxon_design") (author "tom_moxon")
   )
  )
 
@@ -16,6 +16,7 @@
      (port A1 (direction INPUT)) 
      (port A2 (direction INPUT))
      (port Z  (direction OUTPUT))
+     (property LPM_TYPE (string "LPM_FF"))
     )
    )
   )
