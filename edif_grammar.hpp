@@ -116,7 +116,7 @@ struct edif_grammar
         cellref_section_    = '(' >> tok.cellRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> libraryref_section_ >> ')';
         libraryref_section_ = '(' >> tok.libraryRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
 
-        net_section_        = '(' >> tok.net_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> connection_section_ >> ')';
+        net_section_        = '(' >> tok.net_ [PrintStr(*ptb)] >> id_or_rename_ >> connection_section_ >> ')';
         connection_section_ = '(' >> tok.joined_ [PrintStr(*ptb)] >> +port_connections_ >> ')';
         port_connections_   = '(' >> tok.portRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] 
                                 >> -instanceref_section_

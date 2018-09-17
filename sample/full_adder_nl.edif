@@ -97,7 +97,7 @@
        )
      )
 
-     (net B
+     (net (rename RESULT_91_2_93_ "RESULT[2]")
        (joined 
         (portRef B) 
         (portRef A2 (instanceRef U1))
