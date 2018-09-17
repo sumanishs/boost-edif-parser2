@@ -44,7 +44,7 @@ enum token_ids
     ID_INTEGER,
     ID_PROPERTY,
     ID_DIRECTION,
-    ID_CONTENTSTAG,
+    ID_CONTENTS,
     ID_INSTANCE,
     ID_VIEWREF,
     ID_CELLREF,
@@ -53,6 +53,10 @@ enum token_ids
     ID_JOINED,
     ID_PORTREF,
     ID_INSTANCEREF, 
+    ID_LIBRARY,
+    ID_DESIGN,
+    ID_OWNER,
+    ID_RENAME,
 };
 
 template <typename Lexer>
@@ -60,7 +64,7 @@ struct edif_tokens : lex::lexer<Lexer>
 {
     edif_tokens()
     {
-        identifier      = "[a-zA-Z_][a-zA-Z_0-9\\\.]*";
+        identifier      = "[a-zA-Z_][a-zA-Z_0-9\\\.\\\-]*";
         int_constant    = "[0-9][0-9]*";
         double_constant = "[0-9]+\\\.[0-9]+";
         double_exp_constant = "[0-9]+e-[0-9]+";
@@ -89,7 +93,7 @@ struct edif_tokens : lex::lexer<Lexer>
         integer_        = "integer";
         string_         = "string";
         property_       = "property";
-        contentstag_    = "contents";
+        contents_       = "contents";
         instance_       = "instance";
         viewRef_        = "viewRef";
         cellRef_        = "cellRef";
@@ -98,6 +102,11 @@ struct edif_tokens : lex::lexer<Lexer>
         joined_         = "joined";
         portRef_        = "portRef";
         instanceRef_    = "instanceRef";
+        library_        = "library";
+        design_         = "design";
+        owner_          = "owner";
+        rename_         = "rename";
+        
 
         white_space     = "[ \\t]+";
 
@@ -132,8 +141,7 @@ struct edif_tokens : lex::lexer<Lexer>
             (integer_, ID_INTEGER)
             (string_, ID_STRING)
             (property_, ID_PROPERTY)
-            (identifier, ID_IDENTIFIER)
-            (contentstag_, ID_CONTENTSTAG)
+            (contents_, ID_CONTENTS)
             (instance_, ID_INSTANCE)
             (viewRef_, ID_VIEWREF)
             (cellRef_, ID_CELLREF)
@@ -142,6 +150,11 @@ struct edif_tokens : lex::lexer<Lexer>
             (joined_, ID_JOINED)
             (portRef_, ID_PORTREF)
             (instanceRef_, ID_INSTANCEREF)
+            (library_, ID_LIBRARY)
+            (design_, ID_DESIGN)
+            (owner_, ID_OWNER)
+            (rename_, ID_RENAME)
+            (identifier, ID_IDENTIFIER)
         ;
 
         this-> self += white_space [lex::_pass = lex::pass_flags::pass_ignore]; // Need to tokenize but space not
@@ -166,8 +179,8 @@ struct edif_tokens : lex::lexer<Lexer>
     lex::token_def<std::string> edif_, edif_version_, edif_level_, keyword_map_, keyword_level_, status_, written_,
                                 time_stamp_, program_, prog_version_, data_origin_, author_, external_, technology_,
                                 numberDefinition_, cell_, cellType_, view_, viewType_, interface_, port_, direction_,
-                                integer_, string_, property_, contentstag_, instance_, viewRef_, cellRef_, libraryRef_,
-                                net_, joined_, portRef_, instanceRef_
+                                integer_, string_, property_, contents_, instance_, viewRef_, cellRef_, libraryRef_,
+                                net_, joined_, portRef_, instanceRef_, library_, design_, owner_, rename_
                                 ;
 
     lex::token_def<lex::omit> white_space;

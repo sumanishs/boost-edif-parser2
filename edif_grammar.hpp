@@ -40,6 +40,8 @@ struct edif_grammar
                           | keyword_map_
                           | status_statement_ 
                           | external_section_ 
+                          | library_section_
+                          | design_section_
                           ;        
         
         edif_version_   = '(' >> tok.edif_version_ [PrintStr(*ptb)] >> +tok.int_constant [PrintInt(*ptb)] >> ')';
@@ -94,14 +96,16 @@ struct edif_grammar
                                         ;          
         port_declarations_              = '(' >> tok.port_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> direction_section_ >> ')';
         direction_section_              = '(' >> tok.direction_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
-        property_declaration_           = '(' >> tok.property_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> property_val_section_ >> ')';
+        property_declaration_           = '(' >> tok.property_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> +property_val_section_ >> ')';
         property_val_section_           = prop_int_val_
                                         | prop_str_val_
+                                        | prop_owner_val_
                                         ;                                    
         prop_int_val_   = '(' >> tok.integer_ [PrintStr(*ptb)] >> tok.int_constant [PrintInt(*ptb)] >> ')';
         prop_str_val_   = '(' >> tok.string_  [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';  
+        prop_owner_val_ = '(' >> tok.owner_   [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
 
-        contents_section_ = '(' >> tok.contentstag_ [PrintStr(*ptb)] 
+        contents_section_ = '(' >> tok.contents_ [PrintStr(*ptb)] 
                                 >> +contents_section_statements_ 
                                 >> ')';
         contents_section_statements_ = instance_section_
@@ -115,11 +119,34 @@ struct edif_grammar
         net_section_        = '(' >> tok.net_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> connection_section_ >> ')';
         connection_section_ = '(' >> tok.joined_ [PrintStr(*ptb)] >> +port_connections_ >> ')';
         port_connections_   = '(' >> tok.portRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] 
-                                >> instanceref_section_
+                                >> -instanceref_section_
                                 >> ')';
         instanceref_section_ = '(' >> tok.instanceRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';    
-                    
+                   
+        library_section_    = '(' >> tok.library_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)]
+                                  >> +library_section_statements_
+                                  >> ')'
+                                  ;
 
+        library_section_statements_ = edif_level_
+                                     | technology_section_
+                                     | cell_definition_section_
+                                     ;
+
+        design_section_ = '(' >> tok.design_ [PrintStr(*ptb)] >> id_or_rename_
+                              >> +design_section_statements_
+                              >> ')'
+                              ;
+
+        design_section_statements_ = cellref_section_
+                                    | property_declaration_
+                                    ; 
+
+        rename_section_ = '(' >> tok.rename_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
+
+        id_or_rename_ = str_identifier [PrintStr(*ptb)]
+                       | rename_section_
+                       ;
 
 		qi::on_error<qi::fail>
 		  (
@@ -142,12 +169,11 @@ struct edif_grammar
     qi::rule<Iterator, qi::in_state_skipper<Lexer> > cell_definition_section_, cell_def_statements_, cell_type_section_,
                                                      view_section_, view_section_statements_, view_type_section_, interface_section_,
                                                      interface_section_statements_, port_declarations_, direction_section_,
-                                                     property_declaration_, property_val_section_, prop_int_val_, prop_str_val_
-                                                     ;
-
-    qi::rule<Iterator, qi::in_state_skipper<Lexer> > contents_section_, contents_section_statements_, instance_section_, net_section_,
+                                                     property_declaration_, property_val_section_, prop_int_val_, prop_str_val_, prop_owner_val_,
+                                                     contents_section_, contents_section_statements_, instance_section_, net_section_,
                                                      viewref_section_, cellref_section_, libraryref_section_, connection_section_,
-                                                     port_connections_, instanceref_section_
+                                                     port_connections_, instanceref_section_, library_section_, library_section_statements_,
+                                                     design_section_, design_section_statements_, rename_section_, id_or_rename_
                                                      ; 
 
 

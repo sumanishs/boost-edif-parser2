@@ -3,7 +3,7 @@
 
  (status
   (written (timeStamp 2001 11 14 13 3 27)
-   (program "vim" (Version "v6.0"))
+   (program "vim" (version "v6.0"))
    (dataOrigin "moxon_design") (author "tom_moxon")
   )
  )
@@ -161,5 +161,6 @@
   )
 
  )
- (design moxon_edif (cellRef full_adder (libraryRef DESIGNS)))
+  #(design moxon_edif (cellRef full_adder (libraryRef DESIGNS)) (property PART (string "xc5vlx30ff324-1") (owner "Xilinx")))
+  (design (rename and "AND") (cellRef and (libraryRef work)) (property PART (string "xc5vlx30ff324-1") (owner "Xilinx")))
 )

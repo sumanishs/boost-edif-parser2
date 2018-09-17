@@ -44,8 +44,8 @@ EdifReader::Read(std::string& filename){
     std::stringstream strStream;
     strStream << inFile.rdbuf();
     std::string str(strStream.str());
-    //str.pop_back();
-    std::cout << "File content:\n" << str << "!" << std::endl;
+    str.pop_back();
+    //std::cout << "File content:\n" << str << "!" << std::endl;
     inFile.close();
 
     std::string::iterator it = str.begin();
@@ -58,7 +58,7 @@ EdifReader::Read(std::string& filename){
     //    std::cout << "Token: " << itr->id() << ": " /*<< tokens.nameof(itr)*/ << " ('" << itr->value() << "')\n";
     //    ++itr;
     //}   
-    //return 0;
+    ////return 0;
 
 
     std::string ws("WS");
