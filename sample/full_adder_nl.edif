@@ -13,7 +13,7 @@
   (cell an02d1 (cellType GENERIC)
    (view Netlist_representation (viewType NETLIST)
     (interface 
-     (port A1 (direction INPUT)) 
+     (port (rename RESULT_91_0_93_ "RESULT[0]") (direction INPUT)) 
      (port A2 (direction INPUT))
      (port Z  (direction OUTPUT))
      (property LPM_TYPE (string "LPM_FF"))
@@ -62,7 +62,7 @@
        (cellRef xo02d1 (libraryRef generic_gates))
       )
      )
-     (instance U2
+     (instance (rename I_36_1 "I$1")
       (viewRef Netlist_representation 
        (cellRef xo02d1 (libraryRef generic_gates))
       )

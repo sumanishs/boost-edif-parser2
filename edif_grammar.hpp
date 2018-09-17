@@ -94,7 +94,7 @@ struct edif_grammar
         interface_section_statements_   = port_declarations_
                                         | property_declaration_
                                         ;          
-        port_declarations_              = '(' >> tok.port_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> direction_section_ >> ')';
+        port_declarations_              = '(' >> tok.port_ [PrintStr(*ptb)] >> id_or_rename_ >> direction_section_ >> ')';
         direction_section_              = '(' >> tok.direction_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
         property_declaration_           = '(' >> tok.property_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> +property_val_section_ >> ')';
         property_val_section_           = prop_int_val_
@@ -111,7 +111,7 @@ struct edif_grammar
         contents_section_statements_ = instance_section_
                                       | net_section_
                                       ;
-        instance_section_   = '(' >> tok.instance_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> viewref_section_ >> ')';
+        instance_section_   = '(' >> tok.instance_ [PrintStr(*ptb)] >> id_or_rename_ >> viewref_section_ >> ')';
         viewref_section_    = '(' >> tok.viewRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> cellref_section_ >> ')';
         cellref_section_    = '(' >> tok.cellRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> libraryref_section_ >> ')';
         libraryref_section_ = '(' >> tok.libraryRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';

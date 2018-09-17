@@ -64,7 +64,7 @@ struct edif_tokens : lex::lexer<Lexer>
 {
     edif_tokens()
     {
-        identifier      = "[a-zA-Z_][a-zA-Z_0-9\\\.\\\-]*";
+        identifier      = "[a-zA-Z_][a-zA-Z_0-9\\\.\\\-\\\[\\\]$]*";
         int_constant    = "[0-9][0-9]*";
         double_constant = "[0-9]+\\\.[0-9]+";
         double_exp_constant = "[0-9]+e-[0-9]+";
