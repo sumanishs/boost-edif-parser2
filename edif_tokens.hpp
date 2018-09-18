@@ -1,3 +1,10 @@
+/**********************************************************************/
+/* Author: Sumanish <sumanish.cse.jgec@gmail.com>                     */
+/* Modified By: Sumanish <sumanish.cse.jgec@gmail.com>                */
+/*                                                                    */  
+/* This source code can be downloaded, use, modify, distribute        */
+/* freely with this headed intact. Please don't delete this header.   */
+/**********************************************************************/ 
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
 #include <boost/config/warning_disable.hpp>
@@ -60,6 +67,28 @@ enum token_ids
     ID_RENAME,
     ID_SCALE,
     ID_UNIT,
+    ID_COMMENT,
+    ID_ARRAY,
+    ID_BOOLEAN,
+    ID_MEMBER,
+    
+    // Vivado type token ids
+    ID_EDIF_VERSION_X,      
+    ID_EDIF_LEVEL_X,        
+    ID_KEYWORD_MAP_X,       
+    ID_KEYWORD_LEVEL_X,     
+    ID_TIME_STAMP_X,        
+    ID_DATA_ORIGIN_X,       
+    ID_NUMBER_DEFINITION_X, 
+    ID_CELLTYPE_X,          
+    ID_VIEWTYPE_X,          
+    ID_VIEWREF_X,           
+    ID_CELLREF_X,           
+    ID_LIBRARYREF_X,        
+    ID_PORTREF_X,           
+    ID_INSTANCEREF_X,       
+    ID_LIBRARY_X,
+
 };
 
 template <typename Lexer>
@@ -67,8 +96,8 @@ struct edif_tokens : lex::lexer<Lexer>
 {
     edif_tokens()
     {
-        identifier      = "[a-zA-Z_][a-zA-Z_0-9\\\.\\\-\\\[\\\]$]*";
-        string_constant = "[\\\"][a-zA-Z0-9_\\\.\\\-\\\[\\\]$ ]*[\\\"]";        
+        identifier      = "[a-zA-Z_&][a-zA-Z_0-9\\\.\\\-\\\[\\\]$]*";
+        string_constant = "[\\\"][a-zA-Z0-9_\\\.\\\-\\\[\\\]$ :'\\\<\\\>\\\{\\\}\\\*=\\\/\\\\,()]*[\\\"]";        
         int_constant    = "[0-9\\\-][0-9]*";
         double_constant = "[0-9]+\\\.[0-9]+";
         double_exp_constant = "[0-9]+e-[0-9]+";
@@ -77,20 +106,25 @@ struct edif_tokens : lex::lexer<Lexer>
         edif_level_     = "edifLevel";
         keyword_map_    = "keywordMap";
         keyword_level_  = "keywordLevel";
+        time_stamp_     = "timeStamp";
+        data_origin_    = "dataOrigin";
+        numberDefinition_   = "numberDefinition";
+        cellType_       = "cellType";
+        viewType_       = "viewType";
+        viewRef_        = "viewRef";
+        cellRef_        = "cellRef";
+        libraryRef_     = "libraryRef";
+        portRef_        = "portRef";
+        instanceRef_    = "instanceRef";
         status_         = "status";
         written_        = "written";
-        time_stamp_     = "timeStamp";
         program_        = "program";
         prog_version_   = "version";
-        data_origin_    = "dataOrigin";
         author_         = "author";
         external_       = "external";
         technology_     = "technology";
-        numberDefinition_   = "numberDefinition";
         cell_           = "cell";
-        cellType_       = "cellType";
         view_           = "view";
-        viewType_       = "viewType";
         interface_      = "interface";
         port_           = "port";
         direction_      = "direction";
@@ -99,24 +133,39 @@ struct edif_tokens : lex::lexer<Lexer>
         property_       = "property";
         contents_       = "contents";
         instance_       = "instance";
-        viewRef_        = "viewRef";
-        cellRef_        = "cellRef";
-        libraryRef_     = "libraryRef";
         net_            = "net";
         joined_         = "joined";
-        portRef_        = "portRef";
-        instanceRef_    = "instanceRef";
         library_        = "library";
         design_         = "design";
         owner_          = "owner";
         rename_         = "rename";
         scale_          = "scale";
         unit_           = "unit";
+        comment_        = "comment";
+        array_          = "array";
+        boolean_        = "boolean";
+        member_         = "member";
+        // Vivado tokens are little different. This is not good.
+        edif_version_x_ = "edifversion";
+        edif_level_x_   = "ediflevel";
+        keyword_map_x_  = "keywordmap";
+        keyword_level_x_= "keywordlevel";
+        time_stamp_x_   = "timestamp"; 
+        data_origin_x_  = "dataorigin";
+        numberDefinition_x_ = "numberdefinition";
+        cellType_x_     = "celltype";
+        viewType_x_     = "viewtype";
+        viewRef_x_      = "viewref";
+        cellRef_x_      = "cellref";
+        libraryRef_x_   = "libraryref";
+        portRef_x_      = "portref";
+        instanceRef_x_  = "instanceref";
+        library_x_      = "Library";
         
 
         white_space     = "[ \\t]+";
 
-        this->self = lex::token_def<>('(') | ')' | '{' | '}' | '=' | ';' | ':' | '"' | '"';
+        this->self = lex::token_def<>('(') | ')' | '{' | '}' | '=' | ';' | ':' | '"' | '"' | ',';
 
         this->self.add
             (int_constant, ID_INT_CONSTANT)
@@ -163,6 +212,28 @@ struct edif_tokens : lex::lexer<Lexer>
             (rename_, ID_RENAME)
             (scale_, ID_SCALE)
             (unit_, ID_UNIT)
+            (comment_, ID_COMMENT)
+            (array_, ID_ARRAY)
+            (boolean_, ID_BOOLEAN)
+            (member_, ID_MEMBER)
+            /****Vivado type edif tokens****/
+            (edif_version_x_,       ID_EDIF_VERSION_X       ) 
+            (edif_level_x_,         ID_EDIF_LEVEL_X         )   
+            (keyword_map_x_,        ID_KEYWORD_MAP_X        )  
+            (keyword_level_x_,      ID_KEYWORD_LEVEL_X      )
+            (time_stamp_x_,         ID_TIME_STAMP_X         )   
+            (data_origin_x_,        ID_DATA_ORIGIN_X        )  
+            (numberDefinition_x_,   ID_NUMBER_DEFINITION_X  )
+            (cellType_x_,           ID_CELLTYPE_X           )     
+            (viewType_x_,           ID_VIEWTYPE_X           )     
+            (viewRef_x_,            ID_VIEWREF_X            )      
+            (cellRef_x_,            ID_CELLREF_X            )      
+            (libraryRef_x_,         ID_LIBRARYREF_X         )   
+            (portRef_x_,            ID_PORTREF_X            )      
+            (instanceRef_x_,        ID_INSTANCEREF_X        )  
+            (library_x_,            ID_LIBRARY_X            )
+            /*******************************/
+
             (identifier, ID_IDENTIFIER)
         ;
 
@@ -189,9 +260,12 @@ struct edif_tokens : lex::lexer<Lexer>
                                 time_stamp_, program_, prog_version_, data_origin_, author_, external_, technology_,
                                 numberDefinition_, cell_, cellType_, view_, viewType_, interface_, port_, direction_,
                                 integer_, string_, property_, contents_, instance_, viewRef_, cellRef_, libraryRef_,
-                                net_, joined_, portRef_, instanceRef_, library_, design_, owner_, rename_, scale_,
-                                unit_
-                                ;
+                                net_, joined_, portRef_, instanceRef_, library_, library_x_, design_, owner_, rename_, scale_,
+                                unit_, comment_, array_, boolean_, member_;
+
+    lex::token_def<std::string> edif_version_x_, edif_level_x_, keyword_map_x_, keyword_level_x_, time_stamp_x_, 
+                                data_origin_x_, numberDefinition_x_, cellType_x_, viewType_x_, viewRef_x_,        
+                                cellRef_x_, libraryRef_x_, portRef_x_, instanceRef_x_ ;
 
     lex::token_def<lex::omit> white_space;
 };
