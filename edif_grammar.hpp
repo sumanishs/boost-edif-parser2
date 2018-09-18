@@ -26,13 +26,12 @@ struct edif_grammar
 		using boost::spirit::_3;
 		using boost::spirit::_4;
 
-        str_identifier  = tok.identifier [_val = _1] | string_	[_val = _1] ;
-		string_         = '"' >> tok.identifier >> '"';
+        str_identifier  = tok.identifier | tok.string_constant;
         
         start       = +statements;  
         statements =    '(' 
                         >> tok.edif_ [PrintStr(*ptb)] 
-                        >> str_identifier [PrintStr(*ptb)] 
+                        >> id_or_rename_
                         >> +edif_statements_
                         >> ')';
         edif_statements_ = edif_version_
@@ -72,9 +71,19 @@ struct edif_grammar
                                       ;
 
         technology_section_ = '(' >> tok.technology_ [PrintStr(*ptb)] >> numberDefinition_section_ >> ')';
-        numberDefinition_section_   = '(' >> tok.numberDefinition_ [PrintStr(*ptb)] >> ')';     
+        numberDefinition_section_   = '(' >> tok.numberDefinition_ [PrintStr(*ptb)] >> -scale_section_ >> ')'; 
+        scale_section_      = '(' >> tok.scale_ [PrintStr(*ptb)] 
+                                  >> tok.int_constant [PrintInt(*ptb)]     
+                                  >> +scale_section_statements_
+                                  >> ')';
+        scale_section_statements_   = exp_val_
+                                     | unit_section_
+                                     ;
+
+        exp_val_        = '(' >> str_identifier [PrintStr(*ptb)] >> tok.int_constant [PrintInt(*ptb)] >> tok.int_constant [PrintInt(*ptb)] >> ')';
+        unit_section_   = '(' >> tok.unit_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';     
  
-        cell_definition_section_ = '(' >> tok.cell_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] 
+        cell_definition_section_ = '(' >> tok.cell_ [PrintStr(*ptb)] >> id_or_rename_
                                        >> + cell_def_statements_
                                        >> ')';
         cell_def_statements_    = cell_type_section_
@@ -102,7 +111,7 @@ struct edif_grammar
                                         | prop_owner_val_
                                         ;                                    
         prop_int_val_   = '(' >> tok.integer_ [PrintStr(*ptb)] >> tok.int_constant [PrintInt(*ptb)] >> ')';
-        prop_str_val_   = '(' >> tok.string_  [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';  
+        prop_str_val_   = '(' >> tok.string_  [PrintStr(*ptb)] >> -str_identifier [PrintStr(*ptb)] >> ')';  
         prop_owner_val_ = '(' >> tok.owner_   [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
 
         contents_section_ = '(' >> tok.contents_ [PrintStr(*ptb)] 
@@ -111,9 +120,12 @@ struct edif_grammar
         contents_section_statements_ = instance_section_
                                       | net_section_
                                       ;
-        instance_section_   = '(' >> tok.instance_ [PrintStr(*ptb)] >> id_or_rename_ >> viewref_section_ >> ')';
+        instance_section_   = '(' >> tok.instance_ [PrintStr(*ptb)] >> id_or_rename_ >> +instance_section_statements_ >> ')';
+        instance_section_statements_ = viewref_section_
+                                      | property_declaration_
+                                      ;    
         viewref_section_    = '(' >> tok.viewRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> cellref_section_ >> ')';
-        cellref_section_    = '(' >> tok.cellRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> libraryref_section_ >> ')';
+        cellref_section_    = '(' >> tok.cellRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> -libraryref_section_ >> ')';
         libraryref_section_ = '(' >> tok.libraryRef_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
 
         net_section_        = '(' >> tok.net_ [PrintStr(*ptb)] >> id_or_rename_ >> connection_section_ >> ')';
@@ -173,11 +185,12 @@ struct edif_grammar
                                                      contents_section_, contents_section_statements_, instance_section_, net_section_,
                                                      viewref_section_, cellref_section_, libraryref_section_, connection_section_,
                                                      port_connections_, instanceref_section_, library_section_, library_section_statements_,
-                                                     design_section_, design_section_statements_, rename_section_, id_or_rename_
+                                                     design_section_, design_section_statements_, rename_section_, id_or_rename_,
+                                                     scale_section_, scale_section_statements_, exp_val_, unit_section_,
+                                                     instance_section_statements_       
                                                      ; 
 
 
-    qi::rule<Iterator, std::string(), qi::in_state_skipper<Lexer> > string_;
 	qi::rule<Iterator, std::string(), qi::in_state_skipper<Lexer> > str_identifier;
 
     EdifParseTreeBuilder*  ptb;

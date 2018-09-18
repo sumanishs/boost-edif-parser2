@@ -17,6 +17,7 @@ enum token_ids
     ID_INT_CONSTANT = 1000,
     ID_DOUBLE_CONSTANT,
     ID_DOUBLE_EXP_CONSTANT,
+    ID_STRING_CONSTANT,    
     ID_IDENTIFIER,
     ID_WHITE_SPACE,
     ID_EDIF,
@@ -57,6 +58,8 @@ enum token_ids
     ID_DESIGN,
     ID_OWNER,
     ID_RENAME,
+    ID_SCALE,
+    ID_UNIT,
 };
 
 template <typename Lexer>
@@ -65,7 +68,8 @@ struct edif_tokens : lex::lexer<Lexer>
     edif_tokens()
     {
         identifier      = "[a-zA-Z_][a-zA-Z_0-9\\\.\\\-\\\[\\\]$]*";
-        int_constant    = "[0-9][0-9]*";
+        string_constant = "[\\\"][a-zA-Z0-9_\\\.\\\-\\\[\\\]$ ]*[\\\"]";        
+        int_constant    = "[0-9\\\-][0-9]*";
         double_constant = "[0-9]+\\\.[0-9]+";
         double_exp_constant = "[0-9]+e-[0-9]+";
         edif_           = "edif";
@@ -106,6 +110,8 @@ struct edif_tokens : lex::lexer<Lexer>
         design_         = "design";
         owner_          = "owner";
         rename_         = "rename";
+        scale_          = "scale";
+        unit_           = "unit";
         
 
         white_space     = "[ \\t]+";
@@ -116,6 +122,7 @@ struct edif_tokens : lex::lexer<Lexer>
             (int_constant, ID_INT_CONSTANT)
             (double_constant, ID_DOUBLE_CONSTANT)
             (double_exp_constant, ID_DOUBLE_EXP_CONSTANT)
+            (string_constant, ID_STRING_CONSTANT)
             (edif_, ID_EDIF)
             (edif_version_, ID_EDIF_VERSION)
             (edif_level_, ID_EDIF_LEVEL)
@@ -154,6 +161,8 @@ struct edif_tokens : lex::lexer<Lexer>
             (design_, ID_DESIGN)
             (owner_, ID_OWNER)
             (rename_, ID_RENAME)
+            (scale_, ID_SCALE)
+            (unit_, ID_UNIT)
             (identifier, ID_IDENTIFIER)
         ;
 
@@ -172,15 +181,16 @@ struct edif_tokens : lex::lexer<Lexer>
             ;
     }
 
-    lex::token_def<std::string> identifier,  double_exp_constant ;
-    lex::token_def<unsigned int> int_constant;
+    lex::token_def<std::string> identifier,  double_exp_constant , string_constant;
+    lex::token_def<int> int_constant;
     lex::token_def<double> double_constant;
     
     lex::token_def<std::string> edif_, edif_version_, edif_level_, keyword_map_, keyword_level_, status_, written_,
                                 time_stamp_, program_, prog_version_, data_origin_, author_, external_, technology_,
                                 numberDefinition_, cell_, cellType_, view_, viewType_, interface_, port_, direction_,
                                 integer_, string_, property_, contents_, instance_, viewRef_, cellRef_, libraryRef_,
-                                net_, joined_, portRef_, instanceRef_, library_, design_, owner_, rename_
+                                net_, joined_, portRef_, instanceRef_, library_, design_, owner_, rename_, scale_,
+                                unit_
                                 ;
 
     lex::token_def<lex::omit> white_space;

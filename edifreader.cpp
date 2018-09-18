@@ -31,7 +31,7 @@ EdifReader::Read(std::string& filename){
 
     EdifParseTreeBuilder* ptb = new EdifParseTreeBuilder();
 
-    edif_tokens tokens;                         // Our lexer
+    edif_tokens tokens;                                 // Our lexer
     edif_grammar grammar(tokens, ptb);                  // Our parser
 
     std::ifstream inFile;
@@ -44,7 +44,7 @@ EdifReader::Read(std::string& filename){
     std::stringstream strStream;
     strStream << inFile.rdbuf();
     std::string str(strStream.str());
-    str.pop_back();
+    //str.pop_back();
     //std::cout << "File content:\n" << str << "!" << std::endl;
     inFile.close();
 
