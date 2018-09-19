@@ -121,7 +121,8 @@ struct edif_grammar
                                          | property_declaration_
                                          ;
         direction_section_              = '(' >> tok.direction_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> ')';
-        property_declaration_           = '(' >> tok.property_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> +property_val_section_ >> ')';
+        //property_declaration_           = '(' >> tok.property_ [PrintStr(*ptb)] >> str_identifier [PrintStr(*ptb)] >> +property_val_section_ >> ')';
+        property_declaration_           = '(' >> tok.property_ [PrintStr(*ptb)] >> id_or_rename_ >> +property_val_section_ >> ')';
         property_val_section_           = prop_int_val_
                                         | prop_str_val_
                                         | prop_owner_val_
