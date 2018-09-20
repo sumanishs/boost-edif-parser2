@@ -5,6 +5,9 @@
 /* This source code can be downloaded, use, modify, distribute        */
 /* freely with this headed intact. Please don't delete this header.   */
 /**********************************************************************/ 
+#ifndef __EDIF_FUNCTORS__
+#define __EDIF_FUNCTORS__
+
 #include <boost/spirit/include/qi.hpp>
 #include "edif_parse_tree_builder.hpp"
 
@@ -38,3 +41,5 @@ struct PrintDouble {
     PrintDouble(EdifParseTreeBuilder& aPtb):ptb(aPtb){ }
     EdifParseTreeBuilder& ptb;
 };
+
+#endif
